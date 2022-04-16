@@ -1,0 +1,8 @@
+import pymysql as mysql
+import record as r
+
+def connect(HOST, USER, PASSWORD, CHARSET):
+    db = mysql.connect(host=HOST,
+                       user=USER, password=PASSWORD,
+                       charset=CHARSET)
+    return db

@@ -1,0 +1,27 @@
+import mysql
+import record
+import speech_recognition as sr
+from gtts import gTTS
+from playsound import playsound
+
+cursor = mysql.connect("localhost", "root", "root1234", "utf8").cursor()
+cursor.execute('USE AI')
+cursor.execute('SELECT COUNT(*) FROM Information_schema.tables WHERE table_name = \'speaker\' AND table_schema = \'AI\';')
+if(cursor.fetchall()[0] == (0,)):
+    cursor.execute('CREATE TABLE speaker (INPUT VARCHAR(20), OUTPUT VARCHAR(20));')
+record.start_record(1024, 1, 16000, 3, 'INPUT.wav')
+r = sr.Recognizer()
+with sr.AudioFile('INPUT.wav') as source:
+    audio = r.record(source, duration=3)
+INPUT = r.recognize_google(audio_data=audio, language="ko-KR")
+print(INPUT)
+cursor.execute('SELECT INPUT FROM speaker;')
+for i in cursor.fetchall():
+    if(i[0] in INPUT):
+        cursor.execute('SELECT OUTPUT FROM speaker WHERE INPUT = \'' + i[0] + '\';')
+        OUTPUT = cursor.fetchall()[0][0]
+        tts = gTTS(text=OUTPUT, lang='ko')
+        tts.save('OUTPUT.wav')
+        #playsound('OUTPUT.wav')
+        print(OUTPUT)
+        break;
